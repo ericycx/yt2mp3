@@ -28,18 +28,14 @@ A simple command-line tool to download YouTube videos and convert them to MP3.
 ## Usage
 
 ```bash
-python yt2mp3.py <youtube_url> [output_dir]
+python yt2mp3.py <youtube_url>
 ```
 
-**Examples:**
+**Example:**
 
 ```bash
-# Save to current directory
 python yt2mp3.py "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-
-# Save to a specific folder
-python yt2mp3.py "https://www.youtube.com/watch?v=dQw4w9WgXcQ" ~/Music
 ```
 
-The MP3 file will be saved using the video's title as the filename.
+The MP3 file will be saved to your system's **Downloads** folder, named after the video's title.
 
