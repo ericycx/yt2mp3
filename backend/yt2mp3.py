@@ -53,12 +53,17 @@ def download_mp3(url: str, output_dir: str) -> tuple[str, str]:
                 "preferredquality": "192",
             }
         ],
+        "noplaylist": True,       # never download full playlists
         "quiet": True,
         "no_warnings": True,
+        "socket_timeout": 30,     # bail if connection stalls
     }
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(url, download=True)
+        # For playlists/radio that slip through, grab the first entry
+        if "entries" in info:
+            info = info["entries"][0]
         raw = ydl.prepare_filename(info)
         base = os.path.splitext(os.path.basename(raw))[0]
         filepath = os.path.join(output_dir, f"{base}.mp3")
