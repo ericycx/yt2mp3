@@ -26,7 +26,7 @@ export default function App() {
         throw new Error(data.detail || 'Conversion failed.')
       }
 
-      const filename = res.headers.get('X-Filename') || 'audio.mp3'
+      const filename = decodeURIComponent(res.headers.get('X-Filename') || 'audio.mp3')
       const blob = await res.blob()
       const downloadUrl = window.URL.createObjectURL(blob)
       const a = document.createElement('a')

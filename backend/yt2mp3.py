@@ -5,6 +5,7 @@ yt2mp3 - FastAPI backend to download a YouTube video and convert it to MP3.
 
 import os
 import tempfile
+from urllib.parse import quote
 from datetime import datetime, timezone
 from dotenv import load_dotenv
 load_dotenv()
@@ -75,7 +76,7 @@ def convert(request: ConvertRequest):
         return FileResponse(
             filepath,
             media_type="audio/mpeg",
-            headers={"X-Filename": filename},
+            headers={"X-Filename": quote(filename)},
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
