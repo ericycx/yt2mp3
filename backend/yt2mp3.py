@@ -5,6 +5,7 @@ yt2mp3 - FastAPI backend to download a YouTube video and convert it to MP3.
 
 import os
 import tempfile
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
 from urllib.parse import quote
 from datetime import datetime, timezone
 from dotenv import load_dotenv
@@ -76,13 +77,20 @@ def convert(request: ConvertRequest):
         raise HTTPException(status_code=400, detail="No URL provided.")
     try:
         tmp_dir = tempfile.mkdtemp()
-        filepath, filename = download_mp3(request.url, tmp_dir)
+        with ThreadPoolExecutor(max_workers=1) as executor:
+            future = executor.submit(download_mp3, request.url, tmp_dir)
+            try:
+                filepath, filename = future.result(timeout=120)
+            except FuturesTimeoutError:
+                raise HTTPException(status_code=504, detail="Download timed out. The video may be too long or the server is slow.")
         log_conversion(request.url)
         return FileResponse(
             filepath,
             media_type="audio/mpeg",
             headers={"X-Filename": quote(filename)},
         )
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
