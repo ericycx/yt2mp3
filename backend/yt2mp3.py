@@ -4,13 +4,20 @@ yt2mp3 - FastAPI backend to download a YouTube video and convert it to MP3.
 """
 
 import os
+import tempfile
+from datetime import datetime, timezone
+from dotenv import load_dotenv
+load_dotenv()
 import yt_dlp
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
+from supabase import create_client, Client
 
-DOWNLOADS_DIR = os.path.join(os.path.expanduser("~"), "Downloads")
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 app = FastAPI()
 
@@ -19,6 +26,7 @@ app.add_middleware(
     allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["X-Filename"],
 )
 
 
@@ -26,9 +34,14 @@ class ConvertRequest(BaseModel):
     url: str
 
 
-def download_mp3(url: str, output_dir: str = DOWNLOADS_DIR) -> str:
-    os.makedirs(output_dir, exist_ok=True)
+def log_conversion(url: str) -> None:
+    supabase.table("conversions").insert({
+        "url": url,
+        "converted_at": datetime.now(timezone.utc).isoformat(),
+    }).execute()
 
+
+def download_mp3(url: str, output_dir: str) -> tuple[str, str]:
     ydl_opts = {
         "format": "bestaudio/best",
         "outtmpl": os.path.join(output_dir, "%(title)s.%(ext)s"),
@@ -45,9 +58,10 @@ def download_mp3(url: str, output_dir: str = DOWNLOADS_DIR) -> str:
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(url, download=True)
-        title = info.get("title", "audio")
-        filename = os.path.join(output_dir, f"{title}.mp3")
-        return filename
+        raw = ydl.prepare_filename(info)
+        base = os.path.splitext(os.path.basename(raw))[0]
+        filepath = os.path.join(output_dir, f"{base}.mp3")
+        return filepath, f"{base}.mp3"
 
 
 @app.post("/convert")
@@ -55,11 +69,13 @@ def convert(request: ConvertRequest):
     if not request.url:
         raise HTTPException(status_code=400, detail="No URL provided.")
     try:
-        filepath = download_mp3(request.url)
+        tmp_dir = tempfile.mkdtemp()
+        filepath, filename = download_mp3(request.url, tmp_dir)
+        log_conversion(request.url)
         return FileResponse(
             filepath,
             media_type="audio/mpeg",
-            filename=os.path.basename(filepath),
+            headers={"X-Filename": filename},
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

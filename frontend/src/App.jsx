@@ -1,0 +1,79 @@
+import { useState } from 'react'
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000'
+
+export default function App() {
+  const [url, setUrl] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const [success, setSuccess] = useState(false)
+
+  async function handleConvert() {
+    if (!url.trim()) return
+    setLoading(true)
+    setError(null)
+    setSuccess(false)
+
+    try {
+      const res = await fetch(`${BACKEND_URL}/convert`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url }),
+      })
+
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.detail || 'Conversion failed.')
+      }
+
+      const blob = await res.blob()
+      const downloadUrl = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = downloadUrl
+      a.download = 'audio.mp3'
+      a.click()
+      window.URL.revokeObjectURL(downloadUrl)
+      setSuccess(true)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-950 text-white flex flex-col items-center justify-center px-4">
+
+      {/* Header */}
+      <h1 className="text-4xl font-bold mb-2">YT2MP3</h1>
+      <p className="text-gray-400 mb-8">Paste a YouTube URL and download it as MP3.</p>
+
+      {/* Input + Button */}
+      <div className="flex flex-col sm:flex-row gap-3 w-full max-w-xl">
+        <input
+          type="text"
+          placeholder="https://www.youtube.com/watch?v=..."
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          className="flex-1 rounded-lg bg-gray-800 border border-gray-700 px-4 py-3 text-sm outline-none focus:border-indigo-500 transition"
+        />
+        <button
+          onClick={handleConvert}
+          disabled={loading || !url.trim()}
+          className="rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed px-6 py-3 text-sm font-semibold transition"
+        >
+          {loading ? 'Converting...' : 'Convert'}
+        </button>
+      </div>
+
+      {/* Feedback */}
+      {error && (
+        <p className="mt-4 text-red-400 text-sm">{error}</p>
+      )}
+      {success && (
+        <p className="mt-4 text-green-400 text-sm">Download started!</p>
+      )}
+
+    </div>
+  )
+}
