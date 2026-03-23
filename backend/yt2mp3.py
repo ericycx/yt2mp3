@@ -80,7 +80,7 @@ def convert(request: ConvertRequest):
         with ThreadPoolExecutor(max_workers=1) as executor:
             future = executor.submit(download_mp3, request.url, tmp_dir)
             try:
-                filepath, filename = future.result(timeout=120)
+                filepath, filename = future.result(timeout=60)
             except FuturesTimeoutError:
                 raise HTTPException(status_code=504, detail="Download timed out. The video may be too long or the server is slow.")
         log_conversion(request.url)
