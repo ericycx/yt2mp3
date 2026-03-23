@@ -26,11 +26,12 @@ export default function App() {
         throw new Error(data.detail || 'Conversion failed.')
       }
 
+      const filename = res.headers.get('X-Filename') || 'audio.mp3'
       const blob = await res.blob()
       const downloadUrl = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = downloadUrl
-      a.download = 'audio.mp3'
+      a.download = filename
       a.click()
       window.URL.revokeObjectURL(downloadUrl)
       setSuccess(true)
