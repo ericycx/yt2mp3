@@ -4,9 +4,18 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000'
 
 export default function App() {
   const [url, setUrl] = useState('')
+  const [imageFile, setImageFile] = useState(null)
+  const [imagePreview, setImagePreview] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(false)
+
+  function handleImageChange(e) {
+    const file = e.target.files[0]
+    if (!file) return
+    setImageFile(file)
+    setImagePreview(URL.createObjectURL(file))
+  }
 
   async function handleConvert() {
     if (!url.trim()) return
@@ -15,10 +24,13 @@ export default function App() {
     setSuccess(false)
 
     try {
+      const formData = new FormData()
+      formData.append('url', url)
+      if (imageFile) formData.append('image', imageFile)
+
       const res = await fetch(`${BACKEND_URL}/convert`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url }),
+        body: formData,
       })
 
       if (!res.ok) {
@@ -65,6 +77,24 @@ export default function App() {
         >
           {loading ? 'Converting...' : 'Convert'}
         </button>
+      </div>
+
+      {/* Album art upload */}
+      <div className="mt-4 w-full max-w-xl">
+        <label className="flex items-center gap-4 cursor-pointer group">
+          {imagePreview ? (
+            <img src={imagePreview} alt="Album art preview" className="w-16 h-16 rounded-lg object-cover border border-gray-700" />
+          ) : (
+            <div className="w-16 h-16 rounded-lg border border-dashed border-gray-600 flex items-center justify-center text-gray-500 text-xs group-hover:border-indigo-500 transition">
+              Art
+            </div>
+          )}
+          <div>
+            <p className="text-sm text-gray-300">{imageFile ? imageFile.name : 'Attach album art (optional)'}</p>
+            <p className="text-xs text-gray-500">Click to choose an image</p>
+          </div>
+          <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+        </label>
       </div>
 
       {/* Feedback */}

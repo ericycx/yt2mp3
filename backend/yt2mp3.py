@@ -11,10 +11,11 @@ from datetime import datetime, timezone
 from dotenv import load_dotenv
 load_dotenv()
 import yt_dlp
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
-from pydantic import BaseModel
+from mutagen.id3 import ID3, APIC, error as ID3Error
+from mutagen.mp3 import MP3
 from supabase import create_client, Client
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
@@ -30,10 +31,6 @@ app.add_middleware(
     allow_headers=["*"],
     expose_headers=["X-Filename"],
 )
-
-
-class ConvertRequest(BaseModel):
-    url: str
 
 
 def log_conversion(url: str) -> None:
@@ -72,18 +69,30 @@ def download_mp3(url: str, output_dir: str) -> tuple[str, str]:
 
 
 @app.post("/convert")
-def convert(request: ConvertRequest):
-    if not request.url:
+async def convert(url: str = Form(...), image: UploadFile | None = File(None)):
+    if not url:
         raise HTTPException(status_code=400, detail="No URL provided.")
     try:
         tmp_dir = tempfile.mkdtemp()
         with ThreadPoolExecutor(max_workers=1) as executor:
-            future = executor.submit(download_mp3, request.url, tmp_dir)
+            future = executor.submit(download_mp3, url, tmp_dir)
             try:
                 filepath, filename = future.result(timeout=60)
             except FuturesTimeoutError:
                 raise HTTPException(status_code=504, detail="Download timed out. The video may be too long or the server is slow.")
-        log_conversion(request.url)
+
+        if image is not None:
+            image_data = await image.read()
+            mime = image.content_type or "image/jpeg"
+            audio = MP3(filepath, ID3=ID3)
+            try:
+                audio.add_tags()
+            except ID3Error:
+                pass
+            audio.tags.add(APIC(encoding=3, mime=mime, type=3, desc="Cover", data=image_data))
+            audio.save()
+
+        log_conversion(url)
         return FileResponse(
             filepath,
             media_type="audio/mpeg",
