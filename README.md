@@ -1,41 +1,53 @@
 # yt2mp3
 
-A simple command-line tool to download YouTube videos and convert them to MP3.
+A web app to download YouTube videos as MP3s, with optional album art embedding.
+
+## Stack
+
+- **Frontend:** React + Vite + Tailwind CSS
+- **Backend:** FastAPI + yt-dlp + mutagen
 
 ## Requirements
 
-- Python 3.8+
-- [ffmpeg](https://ffmpeg.org/download.html) installed and available on your `PATH`
+- Python 3.10+
+- Node.js 18+
+- [ffmpeg](https://ffmpeg.org/download.html) installed and on your `PATH`
+- A [Supabase](https://supabase.com) project (for conversion logging)
 
-## Installation
+## Setup
 
-1. Clone the repo:
-   ```bash
-   git clone https://github.com/your-username/yt2mp3.git
-   cd yt2mp3
-   ```
+### Backend
 
-2. Install Python dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
+```bash
+cd backend
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
 
-3. Install ffmpeg (if not already installed):
-   - **macOS:** `brew install ffmpeg`
-   - **Ubuntu/Debian:** `sudo apt install ffmpeg`
-   - **Windows:** Download from [ffmpeg.org](https://ffmpeg.org/download.html) and add to PATH
+Create a `.env` file in `backend/`:
+
+```
+SUPABASE_URL=your_supabase_url
+SUPABASE_KEY=your_supabase_anon_key
+```
+
+Run the backend:
+
+```bash
+python yt2mp3.py
+```
+
+### Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
 ## Usage
 
-```bash
-python yt2mp3.py <youtube_url>
-```
-
-**Example:**
-
-```bash
-python yt2mp3.py "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-```
-
-The MP3 file will be saved to your system's **Downloads** folder, named after the video's title.
-
+1. Paste a YouTube URL into the input field
+2. Optionally attach an image to embed as album art
+3. Click **Convert** — the MP3 will download automatically
