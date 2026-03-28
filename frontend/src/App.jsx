@@ -85,7 +85,7 @@ export default function App() {
           {imagePreview ? (
             <img src={imagePreview} alt="Album art preview" className="w-16 h-16 rounded-lg object-cover border border-gray-700" />
           ) : (
-            <div className="w-16 h-16 rounded-lg border border-dashed border-gray-600 flex items-center justify-center text-gray-500 text-xs group-hover:border-indigo-500 transition">
+            <div className="w-16 h-16 rounded-lg bg-gray-800 border border-dashed border-gray-700 flex items-center justify-center text-gray-500 text-xs group-hover:border-indigo-500 transition">
               Art
             </div>
           )}
