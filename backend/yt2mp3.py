@@ -68,6 +68,15 @@ def download_mp3(url: str, output_dir: str) -> tuple[str, str]:
         return filepath, f"{base}.mp3"
 
 
+@app.get("/stats")
+def stats():
+    result = supabase.table("conversions").select("converted_at", count="exact").order("converted_at", desc=False).limit(1).execute()
+    return {
+        "count": result.count,
+        "since": result.data[0]["converted_at"] if result.data else None,
+    }
+
+
 @app.post("/convert")
 async def convert(url: str = Form(...), image: UploadFile | None = File(None)):
     if not url:
