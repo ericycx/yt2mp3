@@ -10,6 +10,7 @@ export default function App() {
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(false)
   const [stats, setStats] = useState(null)
+  const [page, setPage] = useState('home') // advanced settings home page contacts maybe
 
   useEffect(() => {
     fetch(`${BACKEND_URL}/stats`)
@@ -65,6 +66,19 @@ export default function App() {
   return (
     <div className="min-h-screen bg-gray-950 text-white flex flex-col items-center justify-center px-4">
 
+      {/* Left bar */}
+      <div className="fixed top-0 left-0 h-full w-16 bg-indigo-600" />
+      {/* Right bar */}
+      <div className="fixed top-0 right-0 h-full w-16 bg-indigo-600" />
+
+      {/* Header bar */}
+      <div className="fixed top-0 w-full flex gap-10 justify-end items-center text-lg px-6 py-4 text-gray-350 bg-indigo-600">
+        <button>Home</button>
+        <button>Advanced</button>
+        <button>About</button>
+        <button>Contact</button>
+      </div>
+
       {/* Header */}
       <h1 className="text-5xl font-bold mb-2">YT2MP3</h1>
       <p className="text-lg text-gray-400 mb-9">Paste a YouTube URL and download it as MP3.</p>
@@ -113,8 +127,11 @@ export default function App() {
       )}
 
       {/* Stats */}
+      {<p className = "absolute bottom-20 text-s text-gray-500">
+        {'Made by Eric Xu'}
+        </p>}
       {stats?.count > 0 && (
-        <p className="mt-10 text-xs text-gray-600">
+        <p className="absolute bottom-12 text-s text-gray-500">
           {stats.count.toLocaleString()} songs converted since {new Date(stats.since).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
         </p>
       )}
