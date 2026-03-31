@@ -3,6 +3,7 @@
 yt2mp3 - FastAPI backend to download a YouTube video and convert it to MP3.
 """
 
+import base64
 import os
 import tempfile
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
@@ -41,6 +42,14 @@ def log_conversion(url: str) -> None:
 
 
 COOKIES_FILE = os.environ.get("COOKIES_FILE")
+COOKIES_BASE64 = os.environ.get("COOKIES_BASE64")
+
+# If COOKIES_BASE64 is set, decode it to a temp file on startup
+if COOKIES_BASE64 and not COOKIES_FILE:
+    _cookies_path = os.path.join(tempfile.gettempdir(), "yt2mp3_cookies.txt")
+    with open(_cookies_path, "wb") as f:
+        f.write(base64.b64decode(COOKIES_BASE64))
+    COOKIES_FILE = _cookies_path
 
 
 def download_mp3(url: str, output_dir: str, use_cookies: bool = False) -> tuple[str, str]:
@@ -58,12 +67,13 @@ def download_mp3(url: str, output_dir: str, use_cookies: bool = False) -> tuple[
         "quiet": True,
         "no_warnings": True,
         "socket_timeout": 30,     # bail if connection stalls
+        "remote_components": ["ejs:github"],
+        "js_runtimes": ["node", "deno", "bun"],
     }
-    if use_cookies:
+    if use_cookies or (COOKIES_FILE and os.path.exists(COOKIES_FILE)):
         if COOKIES_FILE and os.path.exists(COOKIES_FILE):
             ydl_opts["cookiefile"] = COOKIES_FILE
         else:
-            # Fall back to reading cookies from the local Chrome installation
             ydl_opts["cookiesfrombrowser"] = ("chrome",)
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:

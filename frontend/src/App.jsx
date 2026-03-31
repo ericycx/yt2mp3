@@ -10,7 +10,7 @@ export default function App() {
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(false)
   const [stats, setStats] = useState(null)
-  const [useCookies, setUseCookies] = useState(true)
+  const [useCookies, setUseCookies] = useState(false)
   const [page, setPage] = useState('home') // advanced settings home page contacts maybe
 
   useEffect(() => {
