@@ -1,13 +1,5 @@
 {
   "$schema": "https://schema.railpack.com",
-  "steps": {
-    "install": {
-      "commands": ["pip install -r requirements.txt"]
-    },
-    "setup": {
-      "commands": ["apt-get update && apt-get install -y ffmpeg"]
-    }
-  },
   "deploy": {
     "startCommand": "python3 yt2mp3.py"
   }
