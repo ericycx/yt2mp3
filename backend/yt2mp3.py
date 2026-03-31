@@ -52,7 +52,7 @@ if COOKIES_BASE64 and not COOKIES_FILE:
     COOKIES_FILE = _cookies_path
 
 
-def download_mp3(url: str, output_dir: str, use_cookies: bool = False) -> tuple[str, str]:
+def download_mp3(url: str, output_dir: str) -> tuple[str, str]:
     ydl_opts = {
         "format": "bestaudio/best",
         "outtmpl": os.path.join(output_dir, "%(title)s.%(ext)s"),
@@ -68,13 +68,10 @@ def download_mp3(url: str, output_dir: str, use_cookies: bool = False) -> tuple[
         "no_warnings": True,
         "socket_timeout": 30,     # bail if connection stalls
         "remote_components": ["ejs:github"],
-        "js_runtimes": ["node", "deno", "bun"],
+        "js_runtimes": {"node": {}, "deno": {}, "bun": {}},
     }
-    if use_cookies or (COOKIES_FILE and os.path.exists(COOKIES_FILE)):
-        if COOKIES_FILE and os.path.exists(COOKIES_FILE):
-            ydl_opts["cookiefile"] = COOKIES_FILE
-        else:
-            ydl_opts["cookiesfrombrowser"] = ("chrome",)
+    if COOKIES_FILE and os.path.exists(COOKIES_FILE):
+        ydl_opts["cookiefile"] = COOKIES_FILE
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(url, download=True)
@@ -97,14 +94,13 @@ def stats():
 
 
 @app.post("/convert")
-async def convert(url: str = Form(...), image: UploadFile | None = File(None), use_cookies: str = Form("false")):
+async def convert(url: str = Form(...), image: UploadFile | None = File(None)):
     if not url:
         raise HTTPException(status_code=400, detail="No URL provided.")
     try:
         tmp_dir = tempfile.mkdtemp()
-        cookies = use_cookies.lower() == "true"
         with ThreadPoolExecutor(max_workers=1) as executor:
-            future = executor.submit(download_mp3, url, tmp_dir, cookies)
+            future = executor.submit(download_mp3, url, tmp_dir)
             try:
                 filepath, filename = future.result(timeout=60)
             except FuturesTimeoutError:
