@@ -74,7 +74,7 @@ export default function App() {
       </div>
 
       {/* Header */}
-      <h1 className="text-5xl font-bold mb-2">YT2MP3</h1>
+      <h1 className="text-8xl font-bold mb-9">YT2MP3</h1>
       <p className="text-lg text-gray-400 mb-9">Paste a YouTube URL and download it as MP3.</p>
       {/* Input + Button */}
       <div className="flex flex-col sm:flex-row gap-3 w-full max-w-2xl">
@@ -121,9 +121,6 @@ export default function App() {
       )}
 
       {/* Stats */}
-      {<p className = "absolute bottom-20 text-s text-gray-500">
-        {'Made by Eric Xu'}
-        </p>}
       {stats?.count > 0 && (
         <p className="absolute bottom-12 text-s text-gray-500">
           {stats.count.toLocaleString()} songs converted since {new Date(stats.since).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
