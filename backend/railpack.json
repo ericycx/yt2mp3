@@ -1,5 +1,7 @@
 {
-  "packages": ["ffmpeg"],
+  "packages": {
+    "ffmpeg": "latest"
+  },
   "start": {
     "cmd": "python3 yt2mp3.py"
   }
