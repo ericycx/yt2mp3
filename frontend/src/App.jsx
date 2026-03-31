@@ -10,6 +10,7 @@ export default function App() {
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(false)
   const [stats, setStats] = useState(null)
+  const [useCookies, setUseCookies] = useState(true)
   const [page, setPage] = useState('home') // advanced settings home page contacts maybe
 
   useEffect(() => {
@@ -36,6 +37,7 @@ export default function App() {
       const formData = new FormData()
       formData.append('url', url)
       if (imageFile) formData.append('image', imageFile)
+      formData.append('use_cookies', useCookies ? 'true' : 'false')
 
       const res = await fetch(`${BACKEND_URL}/convert`, {
         method: 'POST',
@@ -112,6 +114,34 @@ export default function App() {
         </label>
       </div>
 
+      {/* Browser cookies toggle */}
+      <div className="mt-5 w-full max-w-2xl">
+        <label className="flex items-center gap-3 cursor-pointer select-none">
+          <div
+            onClick={() => setUseCookies(v => !v)}
+            className={`w-5 h-5 rounded border-2 flex items-center justify-center transition ${
+              useCookies ? 'bg-indigo-600 border-indigo-600' : 'bg-transparent border-gray-600 hover:border-indigo-500'
+            }`}
+          >
+            {useCookies && (
+              <svg className="w-3 h-3 text-white" viewBox="0 0 12 12" fill="none">
+                <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            )}
+          </div>
+          <span className="text-base text-gray-300" onClick={() => setUseCookies(v => !v)}>
+            Use Browser Cookies{' '}
+            <span className="text-gray-500">(helps bypass YouTube bot detection)</span>
+          </span>
+        </label>
+      </div>
+      {/* Stats */}
+      {stats?.count > 0 && (
+        <p className="absolute bottom-10 text-s text-gray-500">
+          {stats.count.toLocaleString()} songs converted since {new Date(stats.since).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+        </p>
+      )}
+
       {/* Feedback */}
       {error && (
         <p className="mt-4 text-red-400 text-sm">{error}</p>
@@ -119,14 +149,6 @@ export default function App() {
       {success && (
         <p className="mt-4 text-green-400 text-sm">Download started!</p>
       )}
-
-      {/* Stats */}
-      {stats?.count > 0 && (
-        <p className="absolute bottom-12 text-s text-gray-500">
-          {stats.count.toLocaleString()} songs converted since {new Date(stats.since).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-        </p>
-      )}
-
     </div>
   )
 }

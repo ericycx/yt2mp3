@@ -40,7 +40,10 @@ def log_conversion(url: str) -> None:
     }).execute()
 
 
-def download_mp3(url: str, output_dir: str) -> tuple[str, str]:
+COOKIES_FILE = os.environ.get("COOKIES_FILE")
+
+
+def download_mp3(url: str, output_dir: str, use_cookies: bool = False) -> tuple[str, str]:
     ydl_opts = {
         "format": "bestaudio/best",
         "outtmpl": os.path.join(output_dir, "%(title)s.%(ext)s"),
@@ -56,6 +59,12 @@ def download_mp3(url: str, output_dir: str) -> tuple[str, str]:
         "no_warnings": True,
         "socket_timeout": 30,     # bail if connection stalls
     }
+    if use_cookies:
+        if COOKIES_FILE and os.path.exists(COOKIES_FILE):
+            ydl_opts["cookiefile"] = COOKIES_FILE
+        else:
+            # Fall back to reading cookies from the local Chrome installation
+            ydl_opts["cookiesfrombrowser"] = ("chrome",)
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(url, download=True)
@@ -78,13 +87,14 @@ def stats():
 
 
 @app.post("/convert")
-async def convert(url: str = Form(...), image: UploadFile | None = File(None)):
+async def convert(url: str = Form(...), image: UploadFile | None = File(None), use_cookies: str = Form("false")):
     if not url:
         raise HTTPException(status_code=400, detail="No URL provided.")
     try:
         tmp_dir = tempfile.mkdtemp()
+        cookies = use_cookies.lower() == "true"
         with ThreadPoolExecutor(max_workers=1) as executor:
-            future = executor.submit(download_mp3, url, tmp_dir)
+            future = executor.submit(download_mp3, url, tmp_dir, cookies)
             try:
                 filepath, filename = future.result(timeout=60)
             except FuturesTimeoutError:
