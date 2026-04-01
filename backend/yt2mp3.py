@@ -50,6 +50,11 @@ if COOKIES_BASE64 and not COOKIES_FILE:
     with open(_cookies_path, "wb") as f:
         f.write(base64.b64decode(COOKIES_BASE64))
     COOKIES_FILE = _cookies_path
+    print(f"[yt2mp3] Cookies loaded from COOKIES_BASE64 ({len(COOKIES_BASE64)} chars) -> {_cookies_path}")
+elif COOKIES_FILE:
+    print(f"[yt2mp3] Using COOKIES_FILE: {COOKIES_FILE}")
+else:
+    print("[yt2mp3] WARNING: No cookies configured. YouTube may block requests.")
 
 
 def download_mp3(url: str, output_dir: str) -> tuple[str, str]:
