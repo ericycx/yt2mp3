@@ -56,6 +56,11 @@ elif COOKIES_FILE:
 else:
     print("[yt2mp3] WARNING: No cookies configured. YouTube may block requests.")
 
+import shutil
+for cmd in ("ffmpeg", "ffprobe", "node", "deno", "bun"):
+    path = shutil.which(cmd)
+    print(f"[yt2mp3] {cmd}: {path or 'NOT FOUND'}")
+
 
 def download_mp3(url: str, output_dir: str) -> tuple[str, str]:
     ydl_opts = {
