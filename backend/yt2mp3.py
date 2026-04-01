@@ -59,7 +59,7 @@ else:
 
 def download_mp3(url: str, output_dir: str) -> tuple[str, str]:
     ydl_opts = {
-        "format": "bestaudio/best",
+        "format": "bestaudio*/best*",
         "outtmpl": os.path.join(output_dir, "%(title)s.%(ext)s"),
         "postprocessors": [
             {
