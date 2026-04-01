@@ -69,9 +69,8 @@ def download_mp3(url: str, output_dir: str) -> tuple[str, str]:
             }
         ],
         "noplaylist": True,       # never download full playlists
-        "quiet": False,
-        "no_warnings": False,
-        "verbose": True,
+        "quiet": True,
+        "no_warnings": True,
         "socket_timeout": 30,     # bail if connection stalls
         "remote_components": ["ejs:github"],
         "js_runtimes": {"node": {}, "deno": {}, "bun": {}},

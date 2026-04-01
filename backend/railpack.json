@@ -1,5 +1,9 @@
 {
   "$schema": "https://schema.railpack.com",
+  "packages": {
+    "ffmpeg": "*",
+    "nodejs": "*"
+  },
   "steps": {
     "build": {
       "commands": []
