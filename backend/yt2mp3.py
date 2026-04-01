@@ -69,14 +69,16 @@ def download_mp3(url: str, output_dir: str) -> tuple[str, str]:
             }
         ],
         "noplaylist": True,       # never download full playlists
-        "quiet": True,
-        "no_warnings": True,
+        "quiet": False,
+        "no_warnings": False,
+        "verbose": True,
         "socket_timeout": 30,     # bail if connection stalls
         "remote_components": ["ejs:github"],
         "js_runtimes": {"node": {}, "deno": {}, "bun": {}},
     }
     if COOKIES_FILE and os.path.exists(COOKIES_FILE):
         ydl_opts["cookiefile"] = COOKIES_FILE
+        print(f"[yt2mp3] Using cookiefile: {COOKIES_FILE} (size: {os.path.getsize(COOKIES_FILE)} bytes)")
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(url, download=True)
