@@ -77,15 +77,25 @@ def download_mp3(url: str, output_dir: str) -> tuple[str, str]:
         ydl_opts["cookiefile"] = COOKIES_FILE
         print(f"[yt2mp3] Using cookiefile: {COOKIES_FILE} (size: {os.path.getsize(COOKIES_FILE)} bytes)")
 
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info(url, download=True)
-        # For playlists/radio that slip through, grab the first entry
-        if "entries" in info:
-            info = info["entries"][0]
-        raw = ydl.prepare_filename(info)
-        base = os.path.splitext(os.path.basename(raw))[0]
-        filepath = os.path.join(output_dir, f"{base}.mp3")
-        return filepath, f"{base}.mp3"
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=True)
+            if "entries" in info:
+                info = info["entries"][0]
+            raw = ydl.prepare_filename(info)
+            base = os.path.splitext(os.path.basename(raw))[0]
+            filepath = os.path.join(output_dir, f"{base}.mp3")
+            return filepath, f"{base}.mp3"
+    except yt_dlp.utils.DownloadError as e:
+        if "Requested format" in str(e):
+            list_opts = {**ydl_opts, "quiet": False, "listformats": True}
+            print(f"[yt2mp3] Format error for {url}. Available formats:")
+            try:
+                with yt_dlp.YoutubeDL(list_opts) as ydl2:
+                    ydl2.extract_info(url, download=False)
+            except Exception:
+                pass
+        raise
 
 
 @app.get("/stats")
