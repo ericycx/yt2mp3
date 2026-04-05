@@ -58,7 +58,7 @@ else:
 
 def download_mp3(url: str, output_dir: str) -> tuple[str, str]:
     ydl_opts = {
-        "format": "bestaudio*/best*",
+        "format": "bestaudio/best",
         "outtmpl": os.path.join(output_dir, "%(title)s.%(ext)s"),
         "postprocessors": [
             {
@@ -67,13 +67,12 @@ def download_mp3(url: str, output_dir: str) -> tuple[str, str]:
                 "preferredquality": "192",
             }
         ],
-        "noplaylist": True,       # never download full playlists
+        "noplaylist": True,
         "quiet": True,
         "no_warnings": True,
-        "socket_timeout": 30,     # bail if connection stalls
-        "remote_components": ["ejs:github"],
-        "js_runtimes": {"node": {}, "deno": {}, "bun": {}},
+        "socket_timeout": 30,
     }
+    
     if COOKIES_FILE and os.path.exists(COOKIES_FILE):
         ydl_opts["cookiefile"] = COOKIES_FILE
         print(f"[yt2mp3] Using cookiefile: {COOKIES_FILE} (size: {os.path.getsize(COOKIES_FILE)} bytes)")
