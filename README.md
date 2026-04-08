@@ -2,6 +2,8 @@
 
 A youtube to mp3 converter.
 
+Note: The website does not work; the program only works locally.
+
 ---
 
 ## Features
