@@ -62,24 +62,3 @@ Create `frontend/.env` if pointing to a non-local backend:
 ```
 VITE_BACKEND_URL=https://your-backend-url.com
 ```
-
-## Deployment
-
-The frontend and backend are deployed separately:
-
-### Frontend — Vercel
-
-1. Import the repo on [Vercel](https://vercel.com)
-2. Set the root directory to `frontend`
-3. Add environment variable: `VITE_BACKEND_URL=https://your-railway-backend.up.railway.app`
-4. Deploy
-
-### Backend — Railway
-
-1. Create a new project on [Railway](https://railway.app) and connect the repo
-2. Set the root directory to `backend`
-3. Add environment variables: `SUPABASE_URL`, `SUPABASE_KEY`
-4. Railway will auto-detect Python — add a start command: `python yt2mp3.py`
-5. Make sure ffmpeg is available (add it via a `nixpacks.toml` or Railway's nixpacks config)
-
-Once the backend is deployed, copy its Railway URL and set it as `VITE_BACKEND_URL` on Vercel.
